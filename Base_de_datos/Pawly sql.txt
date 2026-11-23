@@ -1,0 +1,88 @@
+CREATE DATABASE IF NOT EXISTS pawly_me_database;
+USE pawly_me_database;
+
+CREATE TABLE RESCATISTAS (
+    ID_Rescatista INT AUTO_INCREMENT PRIMARY KEY,
+    ID_NombreRescatistaFundacion VARCHAR(150) NOT NULL,
+    Direccion_RescFunda VARCHAR(255) NOT NULL,
+    Numero_RescFunda VARCHAR(20) NOT NULL,
+    RFC_Fundacion VARCHAR(13),
+    CURP_Rescatista VARCHAR(18) UNIQUE
+);
+
+CREATE TABLE MASCOTA (
+    ID_Mascotas INT AUTO_INCREMENT PRIMARY KEY,
+    ID_Rescatista INT NOT NULL,
+    Nombre_Mascotas VARCHAR(100) NOT NULL,
+    Raza_Mascotas VARCHAR(100),
+    Especie_Mascota VARCHAR(50) NOT NULL,
+    Estatus_Mascota VARCHAR(50) NOT NULL,
+    Edad_Mascota INT,
+    Color_Mascota VARCHAR(50),
+    CONSTRAINT fk_mascota_rescatista
+        FOREIGN KEY (ID_Rescatista) REFERENCES RESCATISTAS(ID_Rescatista)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+);
+
+CREATE TABLE HISTORIAL_CLINICO (
+    ID_Historia INT AUTO_INCREMENT PRIMARY KEY,
+    ID_Mascota INT NOT NULL,
+    Fecha_Consulta DATE NOT NULL,
+    Estado_Salud VARCHAR(100) NOT NULL,
+    Vacunas VARCHAR(255),
+    Desparacitacion VARCHAR(255),
+    Esterelizado BOOLEAN NOT NULL DEFAULT FALSE,
+    Observaciones_Medicas TEXT,
+    CONSTRAINT fk_historial_mascota
+        FOREIGN KEY (ID_Mascota) REFERENCES MASCOTA(ID_Mascotas)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+);
+
+CREATE TABLE ADOPTANTE (
+    ID_Adoptante INT AUTO_INCREMENT PRIMARY KEY,
+    NombreCompleto_Adoptante VARCHAR(150) NOT NULL,
+    CURP_Adoptante VARCHAR(18) NOT NULL UNIQUE,
+    Direcion_Adoptante VARCHAR(255) NOT NULL,
+    NumeroCelular_Adoptante VARCHAR(20) NOT NULL,
+    Correo_Adoptante VARCHAR(150) NOT NULL UNIQUE
+);
+
+CREATE TABLE ADOPTANTE_NO_APTO (
+    ID_Reporte INT AUTO_INCREMENT PRIMARY KEY,
+    ID_Adoptante INT NOT NULL,
+    Causa_Reporte TEXT NOT NULL,
+    Fecha_Reporte DATE NOT NULL,
+    CONSTRAINT fk_no_apto_adoptante
+        FOREIGN KEY (ID_Adoptante) REFERENCES ADOPTANTE(ID_Adoptante)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+);
+
+CREATE TABLE SOLICITUD_DE_ADOPCION (
+    ID_Solicitud INT AUTO_INCREMENT PRIMARY KEY,
+    ID_Adoptante INT NOT NULL,
+    ID_Mascota INT NOT NULL,
+    Estatus_Adopcion VARCHAR(50) NOT NULL,
+    Fecha_Solicitud DATE NOT NULL,
+    CONSTRAINT fk_solicitud_adoptante
+        FOREIGN KEY (ID_Adoptante) REFERENCES ADOPTANTE(ID_Adoptante)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+    CONSTRAINT fk_solicitud_mascota
+        FOREIGN KEY (ID_Mascota) REFERENCES MASCOTA(ID_Mascotas)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+);
+
+CREATE TABLE CITA (
+    ID_Cita INT AUTO_INCREMENT PRIMARY KEY,
+    ID_Solicitud INT NOT NULL,
+    Fecha_Hora DATETIME NOT NULL,
+    Estatus_Cita VARCHAR(50) NOT NULL,
+    CONSTRAINT fk_cita_solicitud
+        FOREIGN KEY (ID_Solicitud) REFERENCES SOLICITUD_DE_ADOPCION(ID_Solicitud)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+);
